@@ -3,6 +3,7 @@
 const bs58 = require('bs58')
 const PeerId = require('peer-id')
 const PeerInfo = require('peer-info')
+const EventEmitter = require('events').EventEmitter
 
 function getB58Str (peer) {
   let b58Str
@@ -22,8 +23,12 @@ function getB58Str (peer) {
   return b58Str
 }
 
-class PeerBook {
+/**
+ * @fires PeerBook#peer:discovery Emitted when a new peer is discovered
+ */
+class PeerBook extends EventEmitter {
   constructor () {
+    super()
     this._peers = {}
   }
 
@@ -47,6 +52,7 @@ class PeerBook {
     // insert if doesn't exist or replace if replace flag is true
     if (!localPeerInfo || replace) {
       this._peers[peerInfo.id.toB58String()] = peerInfo
+      if(!replace) this.emit('peer:discovery', peerInfo)
       return peerInfo
     }
 
